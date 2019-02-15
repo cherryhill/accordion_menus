@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * The accordion menus module provide menu as accordion manner as block basis.
+ */
+
+/**
+ * implement hook_theme().
+ */
+function accordion_menus_theme($existing, $type, $theme, $path) {
+  return [
+    'accordian_menus_block' => [
+      'variables' => ['elements' => []],
+    ],
+  ];
+}
