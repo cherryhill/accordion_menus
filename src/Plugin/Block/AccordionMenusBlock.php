@@ -30,20 +30,20 @@ class AccordionMenusBlock extends BlockBase {
     $parameters->setMinDepth(0)->onlyEnabledLinks();
 
     $tree = $menu_tree->load($menu_name, $parameters);
-    $manipulators = array(
-      array('callable' => 'menu.default_tree_manipulators:checkAccess'),
-      array('callable' => 'menu.default_tree_manipulators:generateIndexAndSort'),
-    );
+    $manipulators = [
+      ['callable' => 'menu.default_tree_manipulators:checkAccess'],
+      ['callable' => 'menu.default_tree_manipulators:generateIndexAndSort'],
+    ];
     $tree = $menu_tree->transform($tree, $manipulators);
 
     $output['#theme'] = 'accordian_menus_block';
     $output['#attached']['library'][] = 'accordion_menus/accordion_menus_widget';
-   
+  
     foreach ($tree as $key => $menu_item) {
       if ($menu_item->hasChildren) {
         $elements[$key] = [
           'content' => $this->generateSubMenuTree($menu_item->subtree),
-          'title' => $menu_item->link->getTitle()
+          'title' => $menu_item->link->getTitle(),
         ];
       }
     }
@@ -52,11 +52,14 @@ class AccordionMenusBlock extends BlockBase {
     return $output;
   }
 
+  /**
+   * Generate submenu output.
+   */
   private function generateSubMenuTree($menu) {
     $output = [];
     $item_lists = [];
-    foreach($menu as $item) {
-      //If menu element disabled skip this branch
+    foreach ($menu as $item) {
+      // If menu element disabled skip this branch.
       if ($item->link->isEnabled()) {
         $item_lists[] = Link::fromTextAndUrl($item->link->getTitle(), $item->link->getUrlObject());
       }

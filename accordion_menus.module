@@ -6,7 +6,7 @@
  */
 
 /**
- * implement hook_theme().
+ * Implements hook_theme().
  */
 function accordion_menus_theme($existing, $type, $theme, $path) {
   return [
