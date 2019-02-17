@@ -2,8 +2,10 @@
 
 namespace Drupal\accordion_menus\Plugin\Block;
 
-use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Link;
+use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Menu\MenuLinkTreeInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a accordion Menu block.
@@ -18,6 +20,32 @@ use Drupal\Core\Link;
 class AccordionMenusBlock extends BlockBase {
 
   /**
+   * The menu link tree service.
+   *
+   * @var \Drupal\Core\Menu\MenuLinkTreeInterface
+   */
+  protected $menuTree;
+
+  /**
+   * Constructs a new AccordionMenuBlock.
+   *
+   * @param \Drupal\Core\Menu\MenuLinkTreeInterface $menu_tree
+   *   The menu tree service.
+   */
+  public function __construct(MenuLinkTreeInterface $menu_tree) {
+    $this->menuTree = $menu_tree;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('menu.link_tree')
+    );
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function build() {
@@ -26,19 +54,19 @@ class AccordionMenusBlock extends BlockBase {
 
     $menu_name = $this->getDerivativeId();
     $menu_tree = \Drupal::menuTree();
-    $parameters = $menu_tree->getCurrentRouteMenuTreeParameters($menu_name);
+    $parameters = $this->menuTree->getCurrentRouteMenuTreeParameters($menu_name);
     $parameters->setMinDepth(0)->onlyEnabledLinks();
 
-    $tree = $menu_tree->load($menu_name, $parameters);
+    $tree = $this->menuTree->load($menu_name, $parameters);
     $manipulators = [
       ['callable' => 'menu.default_tree_manipulators:checkAccess'],
       ['callable' => 'menu.default_tree_manipulators:generateIndexAndSort'],
     ];
-    $tree = $menu_tree->transform($tree, $manipulators);
+    $tree = $this->menuTree->transform($tree, $manipulators);
 
     $output['#theme'] = 'accordian_menus_block';
     $output['#attached']['library'][] = 'accordion_menus/accordion_menus_widget';
-  
+
     foreach ($tree as $key => $menu_item) {
       if ($menu_item->hasChildren) {
         $elements[$key] = [

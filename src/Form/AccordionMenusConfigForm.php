@@ -11,7 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 class AccordionMenusConfigForm extends ConfigFormBase {
 
   /**
-   * @var string Config settings
+   * Config settings.
    */
   const SETTINGS = 'accordion_menus.settings';
 

@@ -46,11 +46,13 @@ class AccordionMenusBlock extends DeriverBase implements ContainerDeriverInterfa
   public function getDerivativeDefinitions($base_plugin_definition) {
     // Get menus from accordion configuration.
     $accordion_menus = \Drupal::config('accordion_menus.settings')->get('accordion_menus');
-    foreach ($this->menuStorage->loadMultiple() as $menu => $entity) {
-      if (in_array($menu, $accordion_menus, TRUE)) {
-        $this->derivatives[$menu] = $base_plugin_definition;
-        $this->derivatives[$menu]['admin_label'] = t('Accordion') . ' ' . $entity->label();
-        $this->derivatives[$menu]['config_dependencies']['config'] = [$entity->getConfigDependencyName()];
+    if (!empty($accordion_menus)) {
+      foreach ($this->menuStorage->loadMultiple() as $menu => $entity) {
+        if (in_array($menu, $accordion_menus, true)) {
+          $this->derivatives[$menu] = $base_plugin_definition;
+          $this->derivatives[$menu]['admin_label'] = t('Accordion ') . $entity->label();
+          $this->derivatives[$menu]['config_dependencies']['config'] = [$entity->getConfigDependencyName()];
+        }
       }
     }
 
