@@ -35,19 +35,22 @@ This module requires no modules outside of Drupal core.
 INSTALLATION
 ------------
 
-Install the Accordion Menus module as you would normally install a contributed Drupal
-module. Visit https://www.drupal.org/node/1897420 for further information.
+Install the Accordion Menus module as you would normally install a contributed
+Drupal module. Visit https://www.drupal.org/node/1897420 for further
+information.
 
 
 CONFIGURATION
 --------------
 
-    1. Navigate to Administration > Extend and enable the Accordion Menus module.
-    2. Navigate to Administration > Configuration > User Interface > Accordion Menus.
+    1. Navigate to Administration > Extend and enable the Accordion Menus
+       module.
+    2. Navigate to Administration > Configuration > User Interface >
+       Accordion Menus.
     3. Select the menus which want to be accordion menu block and save form.
     4. Navigate to Administration -> Menus -> menu which need to accordion
-      -> edit all top menu item of the menu and tick the checkbox of 'show as expended'
-      and save the form.
+      -> edit all top menu item of the menu and tick the checkbox of 'show
+      as expended' and save the form.
    5. Place the menu block in the expected region. Block name will be
       'Accordion {menu name}'
 

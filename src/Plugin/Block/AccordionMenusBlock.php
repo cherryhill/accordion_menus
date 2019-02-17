@@ -53,7 +53,6 @@ class AccordionMenusBlock extends BlockBase {
     $output = [];
 
     $menu_name = $this->getDerivativeId();
-    $menu_tree = \Drupal::menuTree();
     $parameters = $this->menuTree->getCurrentRouteMenuTreeParameters($menu_name);
     $parameters->setMinDepth(0)->onlyEnabledLinks();
 
