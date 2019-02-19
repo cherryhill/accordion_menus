@@ -43,7 +43,8 @@ class AccordionMenusConfigForm extends ConfigFormBase {
       '#type' => 'checkboxes',
       '#title' => $this->t('Accondion Menus'),
       '#options' => $menus,
-      '#default_value' => $config->get('accordion_menus'),
+      '#description' => $this->t('Select each menu to make them accordion menu independently.'),
+      '#default_value' => !empty($config->get('accordion_menus')) ? $config->get('accordion_menus') : [],
     ];
 
     return parent::buildForm($form, $form_state);

@@ -5,6 +5,7 @@ namespace Drupal\accordion_menus\Plugin\Block;
 use Drupal\Core\Link;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Menu\MenuLinkTreeInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -17,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   deriver = "Drupal\accordion_menus\Plugin\Derivative\AccordionMenusBlock"
  * )
  */
-class AccordionMenusBlock extends BlockBase {
+class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   /**
    * The menu link tree service.
@@ -29,18 +30,28 @@ class AccordionMenusBlock extends BlockBase {
   /**
    * Constructs a new AccordionMenuBlock.
    *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param array $plugin_definition
+   *   The plugin implementation definition.
    * @param \Drupal\Core\Menu\MenuLinkTreeInterface $menu_tree
    *   The menu tree service.
    */
-  public function __construct(MenuLinkTreeInterface $menu_tree) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, MenuLinkTreeInterface $menu_tree) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->menuTree = $menu_tree;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
       $container->get('menu.link_tree')
     );
   }
@@ -50,8 +61,6 @@ class AccordionMenusBlock extends BlockBase {
    */
   public function build() {
     $elements = [];
-    $output = [];
-
     $menu_name = $this->getDerivativeId();
     $parameters = $this->menuTree->getCurrentRouteMenuTreeParameters($menu_name);
     $parameters->setMinDepth(0)->onlyEnabledLinks();
@@ -63,9 +72,6 @@ class AccordionMenusBlock extends BlockBase {
     ];
     $tree = $this->menuTree->transform($tree, $manipulators);
 
-    $output['#theme'] = 'accordian_menus_block';
-    $output['#attached']['library'][] = 'accordion_menus/accordion_menus_widget';
-
     foreach ($tree as $key => $menu_item) {
       if ($menu_item->hasChildren) {
         $elements[$key] = [
@@ -75,29 +81,29 @@ class AccordionMenusBlock extends BlockBase {
       }
     }
 
-    $output['#elements'] = $elements;
-    return $output;
+    return [
+      '#theme' => 'accordian_menus_block',
+      '#elements' => $elements,
+      '#attached' => ['library' => ['accordion_menus/accordion_menus_widget']],
+    ];
   }
 
   /**
    * Generate submenu output.
    */
-  private function generateSubMenuTree($menu) {
-    $output = [];
-    $item_lists = [];
-    foreach ($menu as $item) {
+  public function generateSubMenuTree($sub_menus) {
+    $items = [];
+    foreach ($sub_menus as $sub_menu) {
       // If menu element disabled skip this branch.
-      if ($item->link->isEnabled()) {
-        $item_lists[] = Link::fromTextAndUrl($item->link->getTitle(), $item->link->getUrlObject());
+      if ($sub_menu->link->isEnabled()) {
+        $items[] = Link::fromTextAndUrl($sub_menu->link->getTitle(), $sub_menu->link->getUrlObject());
       }
     }
 
-    $output = [
+    return [
       '#theme' => 'item_list',
-      '#items' => $item_lists,
+      '#items' => $items,
     ];
-
-    return $output;
   }
 
 }
