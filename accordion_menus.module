@@ -1,11 +1,11 @@
 <?php
 
-use Drupal\Core\Routing\RouteMatchInterface;
-
 /**
  * @file
  * The accordion menus module provide menu as accordion manner as block basis.
  */
+
+use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Implements hook_theme().
