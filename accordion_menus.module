@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\Core\Routing\RouteMatchInterface;
+
 /**
  * @file
  * The accordion menus module provide menu as accordion manner as block basis.
@@ -21,7 +23,7 @@ function accordion_menus_theme($existing, $type, $theme, $path) {
  *
  * @inheritdoc
  */
-function accordion_menus_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
+function accordion_menus_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.accordion_menus':
       return t('This module will display a Drupal menu using a jQuery UI accordion effect. The
