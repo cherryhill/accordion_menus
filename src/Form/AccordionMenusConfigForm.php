@@ -43,8 +43,29 @@ class AccordionMenusConfigForm extends ConfigFormBase {
       '#type' => 'checkboxes',
       '#title' => $this->t('Accondion Menus'),
       '#options' => $menus,
-      '#description' => $this->t('Select each menu to make them accordion menu independently.'),
+      '#description' => $this->t('Select menu to make them accordion menu.'),
       '#default_value' => !empty($config->get('accordion_menus')) ? $config->get('accordion_menus') : [],
+    ];
+
+    $form['accordion_advanced'] = [
+      '#type' => 'details',
+      '#title' => t('Advanced settings'),
+      '#open' => FALSE,
+    ];
+
+    $form['accordion_advanced']['accordion_menus_no_submenus'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Accondion without sub menu item'),
+      '#options' => $menus,
+      '#description' => $this->t('Menus which have no sub menu item, will show also in accordion menu.'),
+      '#default_value' => !empty($config->get('accordion_menus_no_submenus')) ? $config->get('accordion_menus_no_submenus') : [],
+    ];
+    $form['accordion_advanced']['accordion_menus_default_closed'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Accondion menu closed by default'),
+      '#options' => $menus,
+      '#description' => $this->t('Allow all trees closed at beginning.'),
+      '#default_value' => !empty($config->get('accordion_menus_default_closed')) ? $config->get('accordion_menus_default_closed') : [],
     ];
 
     return parent::buildForm($form, $form_state);
@@ -57,6 +78,8 @@ class AccordionMenusConfigForm extends ConfigFormBase {
     // Retrieve the configuration and Set the submitted configuration setting.
     $this->configFactory->getEditable(static::SETTINGS)
       ->set('accordion_menus', $form_state->getValue('accordion_menus'))
+      ->set('accordion_menus_no_submenus', $form_state->getValue('accordion_menus_no_submenus'))
+      ->set('accordion_menus_default_closed', $form_state->getValue('accordion_menus_default_closed'))
       ->save();
 
     parent::submitForm($form, $form_state);

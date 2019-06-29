@@ -5,6 +5,7 @@ namespace Drupal\accordion_menus\Plugin\Block;
 use Drupal\Core\Link;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Menu\MenuLinkTreeInterface;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -60,31 +61,56 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
    * {@inheritdoc}
    */
   public function build() {
-    $elements = [];
+    $items = [];
     $menu_name = $this->getDerivativeId();
     $parameters = $this->menuTree->getCurrentRouteMenuTreeParameters($menu_name);
     $parameters->setMinDepth(0)->onlyEnabledLinks();
 
-    $tree = $this->menuTree->load($menu_name, $parameters);
     $manipulators = [
       ['callable' => 'menu.default_tree_manipulators:checkAccess'],
       ['callable' => 'menu.default_tree_manipulators:generateIndexAndSort'],
     ];
+
+    $tree = $this->menuTree->load($menu_name, $parameters);
     $tree = $this->menuTree->transform($tree, $manipulators);
 
-    foreach ($tree as $key => $menu_item) {
-      if ($menu_item->hasChildren) {
-        $elements[$key] = [
-          'content' => $this->generateSubMenuTree($menu_item->subtree),
-          'title' => $menu_item->link->getTitle(),
+    // Get accordion configuration.
+    $config = \Drupal::config('accordion_menus.settings');
+    $closed_by_default = array_filter($config->get('accordion_menus_default_closed'));
+    $no_submenu = $config->get('accordion_menus_no_submenus');
+    $without_submenu = in_array($menu_name, $no_submenu, TRUE) ? TRUE : FALSE;
+
+    foreach ($tree as $key => $item) {
+      $link = $item->link;
+
+      // Only render accessible links.
+      if ($this->isAccordionMenusLinkInaccessible($item)) {
+        continue;
+      }
+
+      if ($item->subtree) {
+        $items[$key] = [
+          'content' => $this->generateSubMenuTree($item->subtree),
+          'title' => $link->getTitle(),
+        ];
+      } elseif ($without_submenu) {
+        $items[$key] = [
+          'content' => [
+            '#theme' => 'item_list',
+            '#items' => [Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())],
+          ],
+          'title' => $link->getTitle(),
         ];
       }
     }
 
     return [
       '#theme' => 'accordian_menus_block',
-      '#elements' => $elements,
-      '#attached' => ['library' => ['accordion_menus/accordion_menus_widget']],
+      '#elements' => ['menu_name' => $menu_name, 'items' => $items],
+      '#attached' => [
+        'library' => ['accordion_menus/accordion_menus_widget'],
+        'drupalSettings' => ['accordion_menus' => ['accordion_closed' => $closed_by_default]],
+      ],
     ];
   }
 
@@ -93,11 +119,13 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
    */
   public function generateSubMenuTree($sub_menus) {
     $items = [];
-    foreach ($sub_menus as $sub_menu) {
-      // If menu element disabled skip this branch.
-      if ($sub_menu->link->isEnabled()) {
-        $items[] = Link::fromTextAndUrl($sub_menu->link->getTitle(), $sub_menu->link->getUrlObject());
+    foreach ($sub_menus as $sub_item) {
+      // Only render accessible links.
+      if ($this->isAccordionMenusLinkInaccessible($sub_item)) {
+        continue;
       }
+
+      $items[] = Link::fromTextAndUrl($sub_item->link->getTitle(), $sub_item->link->getUrlObject());
     }
 
     return [
@@ -105,5 +133,16 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
       '#items' => $items,
     ];
   }
+
+  public function isAccordionMenusLinkInaccessible($item) {
+    if (!$item->link->isEnabled()
+      || ($item->access !== NULL && !$item->access instanceof AccessResultInterface)
+      || ($item->access instanceof AccessResultInterface && !$item->access->isAllowed())) {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
 
 }

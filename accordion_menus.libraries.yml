@@ -6,5 +6,7 @@ accordion_menus_widget:
   js:
     js/accordion_menus.js: {}
   dependencies:
+    - core/drupal
     - core/jquery
+    - core/drupalSettings
     - core/jquery.ui.accordion
