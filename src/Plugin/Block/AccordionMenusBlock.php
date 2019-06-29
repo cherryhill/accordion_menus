@@ -3,11 +3,15 @@
 namespace Drupal\accordion_menus\Plugin\Block;
 
 use Drupal\Core\Link;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\Core\Menu\MenuLinkTreeInterface;
 use Drupal\Core\Access\AccessResultInterface;
+use Drupal\Core\Menu\MenuActiveTrailInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+
 
 /**
  * Provides a accordion Menu block.
@@ -21,7 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
-  /**
+   /**
    * The menu link tree service.
    *
    * @var \Drupal\Core\Menu\MenuLinkTreeInterface
@@ -29,7 +33,14 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
   protected $menuTree;
 
   /**
-   * Constructs a new AccordionMenuBlock.
+   * The active menu trail service.
+   *
+   * @var \Drupal\Core\Menu\MenuActiveTrailInterface
+   */
+  protected $menuActiveTrail;
+
+  /**
+   * Constructs a new SystemMenuBlock.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -39,10 +50,17 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
    *   The plugin implementation definition.
    * @param \Drupal\Core\Menu\MenuLinkTreeInterface $menu_tree
    *   The menu tree service.
+   * @param \Drupal\Core\Menu\MenuActiveTrailInterface $menu_active_trail
+   *   The active menu trail service.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, MenuLinkTreeInterface $menu_tree) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, MenuLinkTreeInterface $menu_tree, MenuActiveTrailInterface $menu_active_trail = NULL) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->menuTree = $menu_tree;
+    if ($menu_active_trail === NULL) {
+      @trigger_error('The menu.active_trail service must be passed to SystemMenuBlock::__construct(), it is required before Drupal 9.0.0. See https://www.drupal.org/node/2669550.', E_USER_DEPRECATED);
+      $menu_active_trail = \Drupal::service('menu.active_trail');
+    }
+    $this->menuActiveTrail = $menu_active_trail;
   }
 
   /**
@@ -53,7 +71,8 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('menu.link_tree')
+      $container->get('menu.link_tree'),
+      $container->get('menu.active_trail')
     );
   }
 
@@ -134,6 +153,12 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
     ];
   }
 
+  /**
+   * Validate of the menu item accessibility.
+   *
+   * @param array $item
+   *   Menu item object.
+   */
   public function isAccordionMenusLinkInaccessible($item) {
     if (!$item->link->isEnabled()
       || ($item->access !== NULL && !$item->access instanceof AccessResultInterface)
@@ -144,5 +169,31 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
     return FALSE;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheTags() {
+    // Even when the menu block renders to the empty string for a user, we want
+    // the cache tag for this menu to be set: whenever the menu is changed, this
+    // menu block must also be re-rendered for that user, because maybe a menu
+    // link that is accessible for that user has been added.
+    $cache_tags = parent::getCacheTags();
+    $cache_tags[] = 'config:system.menu.' . $this->getDerivativeId();
+    return $cache_tags;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheContexts() {
+    // ::build() uses MenuLinkTreeInterface::getCurrentRouteMenuTreeParameters()
+    // to generate menu tree parameters, and those take the active menu trail
+    // into account. Therefore, we must vary the rendered menu by the active
+    // trail of the rendered menu.
+    // Additional cache contexts, e.g. those that determine link text or
+    // accessibility of a menu, will be bubbled automatically.
+    $menu_name = $this->getDerivativeId();
+    return Cache::mergeContexts(parent::getCacheContexts(), ['route.menu_active_trails:' . $menu_name]);
+  }
 
 }

@@ -49,7 +49,7 @@ class AccordionMenusConfigForm extends ConfigFormBase {
 
     $form['accordion_advanced'] = [
       '#type' => 'details',
-      '#title' => t('Advanced settings'),
+      '#title' => $this->t('Advanced settings'),
       '#open' => FALSE,
     ];
 
