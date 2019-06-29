@@ -8,11 +8,11 @@
       var closedByDefault = accordionMenus.accordion_closed;
 
       // Set auto height.
-      $('.accordion_menus_block_container').accordion({header: 'h2.accordion-title', autoHeight: true});
+      $(".accordion_menus_block_container").accordion({header: 'h2.accordion-title', heightStyle: "content"});
 
       // Make collapsible by default.
       $.each(closedByDefault, function(i, val) {
-        $('.accordion_menus_block_container.' + val).accordion({ header: 'h2.accordion-title', collapsible: true, active: false });
+        $('.accordion_menus_block_container.' + val).accordion({collapsible: true, active: false });
       });
     }
   };
