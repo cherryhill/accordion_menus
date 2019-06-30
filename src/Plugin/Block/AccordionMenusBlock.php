@@ -5,13 +5,12 @@ namespace Drupal\accordion_menus\Plugin\Block;
 use Drupal\Core\Link;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Block\BlockBase;
-use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\Core\Menu\MenuLinkTreeInterface;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Menu\MenuActiveTrailInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-
 
 /**
  * Provides a accordion Menu block.
@@ -25,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
-   /**
+  /**
    * The menu link tree service.
    *
    * @var \Drupal\Core\Menu\MenuLinkTreeInterface
@@ -38,6 +37,13 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
    * @var \Drupal\Core\Menu\MenuActiveTrailInterface
    */
   protected $menuActiveTrail;
+
+  /**
+   * Drupal\Core\Config\ConfigFactoryInterface definition.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
 
   /**
    * Constructs a new SystemMenuBlock.
@@ -53,7 +59,7 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
    * @param \Drupal\Core\Menu\MenuActiveTrailInterface $menu_active_trail
    *   The active menu trail service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, MenuLinkTreeInterface $menu_tree, MenuActiveTrailInterface $menu_active_trail = NULL) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, MenuLinkTreeInterface $menu_tree, MenuActiveTrailInterface $menu_active_trail = NULL, ConfigFactoryInterface $config_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->menuTree = $menu_tree;
     if ($menu_active_trail === NULL) {
@@ -61,6 +67,7 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
       $menu_active_trail = \Drupal::service('menu.active_trail');
     }
     $this->menuActiveTrail = $menu_active_trail;
+    $this->configFactory = $config_factory;
   }
 
   /**
@@ -72,7 +79,8 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
       $plugin_id,
       $plugin_definition,
       $container->get('menu.link_tree'),
-      $container->get('menu.active_trail')
+      $container->get('menu.active_trail'),
+      $container->get('config.factory')
     );
   }
 
@@ -94,7 +102,7 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
     $tree = $this->menuTree->transform($tree, $manipulators);
 
     // Get accordion configuration.
-    $config = \Drupal::config('accordion_menus.settings');
+    $config = $this->configFactory->getEditable('accordion_menus.settings');
     $closed_by_default = array_filter($config->get('accordion_menus_default_closed'));
     $no_submenu = $config->get('accordion_menus_no_submenus');
     $without_submenu = in_array($menu_name, $no_submenu, TRUE) ? TRUE : FALSE;
@@ -112,7 +120,8 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
           'content' => $this->generateSubMenuTree($item->subtree),
           'title' => $link->getTitle(),
         ];
-      } elseif ($without_submenu) {
+      }
+      elseif ($without_submenu) {
         $items[$key] = [
           'content' => [
             '#theme' => 'item_list',
