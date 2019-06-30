@@ -58,7 +58,7 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
    *   The menu tree service.
    * @param \Drupal\Core\Menu\MenuActiveTrailInterface $menu_active_trail
    *   The active menu trail service.
-   * @param \Drupal\Core\Plugin\ContainerFactoryPluginInterface $config_factory
+   * @param \Drupal\Core\Plugin\ConfigFactoryInterface $config_factory
    *   The configuration service.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, MenuLinkTreeInterface $menu_tree, MenuActiveTrailInterface $menu_active_trail = NULL, ConfigFactoryInterface $config_factory) {
