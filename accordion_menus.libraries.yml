@@ -9,4 +9,4 @@ accordion_menus_widget:
     - core/drupal
     - core/jquery
     - core/drupalSettings
-    - core/jquery.ui.accordion
+    - jquery_ui_accordion/accordion
