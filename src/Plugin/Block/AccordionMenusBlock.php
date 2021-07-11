@@ -50,7 +50,7 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
+   * @param array $plugin_id
    *   The plugin_id for the plugin instance.
    * @param array $plugin_definition
    *   The plugin implementation definition.
@@ -58,7 +58,7 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
    *   The menu tree service.
    * @param \Drupal\Core\Menu\MenuActiveTrailInterface $menu_active_trail
    *   The active menu trail service.
-   * @param \Drupal\Core\Plugin\ConfigFactoryInterface $config_factory
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The configuration service.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, MenuLinkTreeInterface $menu_tree, MenuActiveTrailInterface $menu_active_trail = NULL, ConfigFactoryInterface $config_factory) {
@@ -169,6 +169,9 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
    *
    * @param array $item
    *   Menu item object.
+   *
+   * @return boolean
+   *   Return a bool result about is the menu link is inaccessible.
    */
   public function isAccordionMenusLinkInaccessible($item) {
     if (!$item->link->isEnabled()
