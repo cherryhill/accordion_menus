@@ -1,9 +1,10 @@
 name: Accordion Menus
 description: Provides accordion menu blocks.
+core_version_requirement: ^8 || ^9
 package: User interface
 type: module
-core_version_requirement: ^8 || ^9
 dependencies:
+  - jquery_ui:jquery_ui
   - jquery_ui_accordion:jquery_ui_accordion
 
 configure: accordion_menus.config

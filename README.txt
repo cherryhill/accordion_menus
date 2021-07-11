@@ -29,15 +29,14 @@ header item collapses the menu beneath it.
 REQUIREMENTS
 ------------
 
-This module requires no modules outside of Drupal core.
+This module depends on jquery_ui_accordian (https://www.drupal.org/project/jquery_ui_accordion) module.
 
 
 INSTALLATION
 ------------
 
-Install the Accordion Menus module as you would normally install a contributed
-Drupal module. Visit https://www.drupal.org/node/1897420 for further
-information.
+It has dependency on jquery_ui_accordian module, so please install jquery_ui and jquery_ui_accordian modules. Recommened to install the module using composer.
+Visit https://www.drupal.org/node/1897420 for further information.
 
 
 CONFIGURATION
