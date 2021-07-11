@@ -41,7 +41,7 @@ class AccordionMenusConfigForm extends ConfigFormBase {
     $menus = menu_ui_get_menus();
     $form['accordion_menus'] = [
       '#type' => 'checkboxes',
-      '#title' => $this->t('Accondion Menus'),
+      '#title' => $this->t('Accordion Menus'),
       '#options' => $menus,
       '#description' => $this->t('Select menu to make them accordion menu.'),
       '#default_value' => !empty($config->get('accordion_menus')) ? $config->get('accordion_menus') : [],
@@ -55,14 +55,14 @@ class AccordionMenusConfigForm extends ConfigFormBase {
 
     $form['accordion_advanced']['accordion_menus_no_submenus'] = [
       '#type' => 'checkboxes',
-      '#title' => $this->t('Accondion without sub menu item'),
+      '#title' => $this->t('Accordion without sub menu item'),
       '#options' => $menus,
       '#description' => $this->t('Menus which have no sub menu item, will show also in accordion menu.'),
       '#default_value' => !empty($config->get('accordion_menus_no_submenus')) ? $config->get('accordion_menus_no_submenus') : [],
     ];
     $form['accordion_advanced']['accordion_menus_default_closed'] = [
       '#type' => 'checkboxes',
-      '#title' => $this->t('Accondion menu closed by default'),
+      '#title' => $this->t('Accordion menu closed by default'),
       '#options' => $menus,
       '#description' => $this->t('Allow all trees closed at beginning.'),
       '#default_value' => !empty($config->get('accordion_menus_default_closed')) ? $config->get('accordion_menus_default_closed') : [],
