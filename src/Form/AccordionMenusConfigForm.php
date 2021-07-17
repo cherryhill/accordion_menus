@@ -67,6 +67,22 @@ class AccordionMenusConfigForm extends ConfigFormBase {
       '#description' => $this->t('Allow all trees closed at beginning.'),
       '#default_value' => !empty($config->get('accordion_menus_default_closed')) ? $config->get('accordion_menus_default_closed') : [],
     ];
+    $form['accordion_advanced']['default_tab'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Default tab'),
+      '#description' => $this->t('Consider all first level menu item and value will start from 0. Example for first menu item, it will be 0, for second it will be 1 and so on.'),
+      '#open' => TRUE,
+    ];
+
+    foreach ($menus as $menu_name => $menu) {
+      $form['accordion_advanced']['default_tab']['accordion_menus_active_tab_' . $menu_name] = [
+        '#type' => 'textfield',
+        '#title' => $this->t($menu . ': Active menu tab'),
+        '#attributes' => ['type' => 'number'],
+        '#maxlength' => 3,
+        '#default_value' => !empty($config->get('accordion_menus_active_tab_' . $menu_name)) ? $config->get('accordion_menus_active_tab_' . $menu_name) : 0,
+      ];
+    }
 
     return parent::buildForm($form, $form_state);
   }
@@ -76,11 +92,20 @@ class AccordionMenusConfigForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Retrieve the configuration and Set the submitted configuration setting.
-    $this->configFactory->getEditable(static::SETTINGS)
+    $output = $this->configFactory->getEditable(static::SETTINGS)
       ->set('accordion_menus', $form_state->getValue('accordion_menus'))
       ->set('accordion_menus_no_submenus', $form_state->getValue('accordion_menus_no_submenus'))
-      ->set('accordion_menus_default_closed', $form_state->getValue('accordion_menus_default_closed'))
-      ->save();
+      ->set('accordion_menus_default_closed', $form_state->getValue('accordion_menus_default_closed'));
+
+    $menus = menu_ui_get_menus();
+    $active = [];
+    foreach ($menus as $menu_name => $menu) {
+      $output->set('accordion_menus_active_tab_' . $menu_name, $form_state->getValue('accordion_menus_active_tab_' . $menu_name));
+      $active[$menu_name] = $form_state->getValue('accordion_menus_active_tab_' . $menu_name);
+    }
+
+    $output->set('accordion_menus_active_tab', $active);
+    $output->save();
 
     parent::submitForm($form, $form_state);
 

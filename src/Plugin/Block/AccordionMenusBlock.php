@@ -108,6 +108,7 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
     $closed_by_default = array_filter($config->get('accordion_menus_default_closed'));
     $no_submenu = $config->get('accordion_menus_no_submenus');
     $without_submenu = in_array($menu_name, $no_submenu, TRUE) ? TRUE : FALSE;
+    $active_tab = !empty($config->get('accordion_menus_active_tab')) ? $config->get('accordion_menus_active_tab') : [];
 
     foreach ($tree as $key => $item) {
       $link = $item->link;
@@ -139,7 +140,7 @@ class AccordionMenusBlock extends BlockBase implements ContainerFactoryPluginInt
       '#elements' => ['menu_name' => $menu_name, 'items' => $items],
       '#attached' => [
         'library' => ['accordion_menus/accordion_menus_widget'],
-        'drupalSettings' => ['accordion_menus' => ['accordion_closed' => $closed_by_default]],
+        'drupalSettings' => ['accordion_menus' => ['accordion_closed' => $closed_by_default, 'active_tab' => $active_tab]],
       ],
     ];
   }
