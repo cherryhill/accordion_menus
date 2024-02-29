@@ -38,7 +38,15 @@ class AccordionMenusConfigForm extends ConfigFormBase {
     $config = $this->config(static::SETTINGS);
 
     // Get list of menus.
-    $menus = menu_ui_get_menus();
+    /** 
+     * @deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use
+     * \Drupal\system\Entity\Menu::loadMultiple() instead.
+     * @see https://www.drupal.org/node/1882552
+     */
+    $menus = array_map(function ($menu) {
+      return $menu->label();
+    }, Menu::loadMultiple());
+    asort($menus);
     $form['accordion_menus'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Accordion Menus'),

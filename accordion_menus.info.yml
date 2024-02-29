@@ -1,6 +1,6 @@
 name: Accordion Menus
 description: Provides accordion menu blocks.
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^9 || ^10
 package: User interface
 type: module
 dependencies:

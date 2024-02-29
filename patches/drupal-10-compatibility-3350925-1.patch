@@ -1,0 +1,49 @@
+diff --git a/accordion_menus.info.yml b/accordion_menus.info.yml
+index 2135bc5..ae9753c 100644
+--- a/accordion_menus.info.yml
++++ b/accordion_menus.info.yml
+@@ -1,6 +1,6 @@
+ name: Accordion Menus
+ description: Provides accordion menu blocks.
+-core_version_requirement: ^8 || ^9
++core_version_requirement: ^9 || ^10
+ package: User interface
+ type: module
+ dependencies:
+diff --git a/composer.json b/composer.json
+index e5ef6aa..20167fa 100644
+--- a/composer.json
++++ b/composer.json
+@@ -16,8 +16,8 @@
+     "source": "http://cgit.drupalcode.org/accordion_menus"
+   },
+   "require": {
+-    "drupal/core": "^8.8 || ^9",
+-    "drupal/jquery_ui": "^1.4",
+-    "drupal/jquery_ui_accordion": "^1.1"
++    "drupal/core": "^9 || ^10",
++    "drupal/jquery_ui": "^1.6",
++    "drupal/jquery_ui_accordion": "^2.0"
+   }
+ }
+diff --git a/src/Form/AccordionMenusConfigForm.php b/src/Form/AccordionMenusConfigForm.php
+index 90fc97c..244628f 100644
+--- a/src/Form/AccordionMenusConfigForm.php
++++ b/src/Form/AccordionMenusConfigForm.php
+@@ -38,7 +38,15 @@ class AccordionMenusConfigForm extends ConfigFormBase {
+     $config = $this->config(static::SETTINGS);
+ 
+     // Get list of menus.
+-    $menus = menu_ui_get_menus();
++    /** 
++     * @deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use
++     * \Drupal\system\Entity\Menu::loadMultiple() instead.
++     * @see https://www.drupal.org/node/1882552
++     */
++    $menus = array_map(function ($menu) {
++      return $menu->label();
++    }, Menu::loadMultiple());
++    asort($menus);
+     $form['accordion_menus'] = [
+       '#type' => 'checkboxes',
+       '#title' => $this->t('Accordion Menus'),
